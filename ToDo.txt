@@ -1,0 +1,44 @@
+Create background class system {
+    Gameplay
+    Cutscene
+}
+Create leveling based on background {
+    1,1,1 = level ?
+    0,1,0 = level ?
+    10,0,4 = Level 1
+}
+create dialog system {
+    allows text to be dynamicly drawn to the screen
+}
+Create main menu {
+    Play
+    Settings
+    Quit
+
+}
+Settings {
+    resolution
+    brightness
+    Point and click
+}
+
+#
+Save Settings
+pause menu
+Add game Music
+add cutscenes
+add chars  
+
+---AT end-----
+REMOVE GRID.txt 
+remove Debug prints if not in debug function
+Remove ToDo.txt
+
+root.attributes("-disabled", True) // To allow user to click things or not
+root.bind("<Event>", func) // to set keybinds
+func must have event variable // """def function(*event*):"""
+root.destroy // ends the loop permentetly
+root.overrideredirect(True) // Removes all window decorations (title bar, borders). 
+
+root.winfo_screenwidth() 
+root.winfo_screenheight() // Fetches the resolution of your monitor in pixels.
