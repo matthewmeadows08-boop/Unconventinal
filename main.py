@@ -1,101 +1,165 @@
 ####import modules###
-import tkinter as TK #import Tkinter
-import background as BG #import background file
-from PIL import ImageTk, Image #import pillow for images
-import os as system
+import tkinter as TK
+from PIL import ImageTk, Image
+import background as BG
 
-#import variables from background.py
-PanelX = BG.panelX
-PanelY = BG.panelY
-PanelZ = BG.panelZ
+# -------------------------------------------------
+# Variables
+# -------------------------------------------------
+PanelX, PanelY, PanelZ = BG.panelX, BG.panelY, BG.panelZ
 
+debug_visible = False
+debug_text_id = None
+pause_visible = False
+last_size = None
 
-###create window###
-root = TK.Tk() #name Tkinter as root
-root.title("GameEngine") #name the window
-root.iconbitmap("Images/AppIcon/favicon.ico") #set icon of window 
-root.attributes('-fullscreen', True) #set fullscreen
-root.minsize(600, 400) #set minimum window size
+# -------------------------------------------------
+# Root Window
+# -------------------------------------------------
+root = TK.Tk()
+root.title("GameEngine")
+root.attributes("-fullscreen", True)
+root.minsize(600, 400)
+root.update()  # force real dimensions
 
+# -------------------------------------------------
+# Canvas
+# -------------------------------------------------
+screen_w = root.winfo_screenwidth()
+screen_h = root.winfo_screenheight()
 
-###set background image###
-bg_image = Image.open(BG.image_path)
-photo = ImageTk.PhotoImage(bg_image)
+canvas = TK.Canvas(
+    root,
+    width=screen_w,
+    height=screen_h,
+    highlightthickness=0
+)
+canvas.pack(fill=TK.BOTH, expand=True)
 
-background_label = TK.Label(root, image=photo)
-background_label.place(x=0, y=0, relwidth=1, relheight=1)
-background_label.image = photo 
+# -------------------------------------------------
+# Background Image
+# -------------------------------------------------
+bg_image_raw = Image.open(BG.image_path)
+bg_resized = bg_image_raw.resize(
+    (screen_w, screen_h),
+    Image.Resampling.LANCZOS
+)
+bg_photo = ImageTk.PhotoImage(bg_resized)
+canvas.bg_photo = bg_photo  # prevent garbage collection
 
-#set foreground text
-foreground_label = TK.Label(root, text= ("PanelX:", PanelX,"//", "panelY:", PanelY,"//", "PanelZ:", PanelZ), font=("Helvetica", 16), bg="#88cffa") 
-foreground_label.place(relx=0.5, rely=0.1, anchor=TK.CENTER)
+bg_canvas_obj = canvas.create_image(
+    0, 0, anchor=TK.NW, image=bg_photo
+)
 
+last_size = (screen_w, screen_h)
 
-###define functions###
-def enter_fullscreen(event):
-    root.attributes('-fullscreen', True)
-
-def exit_fullscreen(event):
-    root.attributes('-fullscreen', False)
-
-def printdebug(event):
-    # Print debug information to console
-    print(" ")
-    print("---DEBUG INFO---")
-    print("PanelX:", PanelX)
-    print("PanelY:", PanelY)
-    print("PanelZ:", PanelZ)
-    print("Image Path:", BG.get_image_path(PanelX, PanelY, PanelZ))
-
-def loadsprites(x, y, z):
-    # Load sprites based on current panel coordinates
-    global PanelX, PanelY, PanelZ
-    PanelX, PanelY, PanelZ = x, y, z
-    if PanelX == 1 and PanelY == 1 and PanelZ == 1:
-        print("Load sprites for panel (1, 1, 1)")
-    elif PanelX == 2 and PanelY == 2 and PanelZ == 2:
-        print("Load sprites for panel (2, 2, 2)")
-    elif PanelX == 3 and PanelY == 3 and PanelZ == 3:
-        print("Load sprites for panel (3, 3, 3)")
-    else:
-        print("No sprites to load for panel (", PanelX, ",", PanelY, ",", PanelZ, ")")
-    pass
-
-def clear_sprites():
-    # Clear all currently loaded sprites
-    print("Clearing all sprites from the screen.")
-    pass
-
-def change_background(x, y, z):
-    # Change background image based on new X, Y, Z coordinates."
-    global PanelX, PanelY, PanelZ, photo, bg_image
-    PanelX, PanelY, PanelZ = x, y, z
-    new_image_path = BG.get_image_path(x, y, z)
-    bg_image = Image.open(new_image_path)
-    photo = ImageTk.PhotoImage(bg_image)
-    background_label.config(image=photo)
-    background_label.image = photo
-    printdebug()
-    clear_sprites()
-    loadsprites()
-
+# -------------------------------------------------
+# Functions
+# -------------------------------------------------
 def on_window_resize(event):
-    # Resize background image to fit new window size
-    global photo
-    if bg_image:
-        resized_image = bg_image.resize((event.width, event.height), Image.Resampling.LANCZOS)
-        photo = ImageTk.PhotoImage(resized_image)
-        background_label.config(image=photo)
-        background_label.image = photo
-        print("Window resized to:", event.width,"x",event.height)
+    global bg_photo, bg_resized, last_size
+
+    if event.widget != root:
+        return
+
+    if (event.width, event.height) == last_size:
+        return
+
+    last_size = (event.width, event.height)
+
+    bg_resized = bg_image_raw.resize(
+        (event.width, event.height),
+        Image.Resampling.LANCZOS
+    )
+    bg_photo = ImageTk.PhotoImage(bg_resized)
+    canvas.bg_photo = bg_photo
+    canvas.itemconfig(bg_canvas_obj, image=bg_photo)
+
+    update_debug_text()
 
 
-###bind events###
-root.bind('<Configure>', on_window_resize)
-root.bind('f', enter_fullscreen)
-root.bind('<Escape>', exit_fullscreen) #bind escape key to exit fullscreen
-root.bind('d', printdebug) #bind D key to debug
+def toggle_fullscreen(event=None):
+    root.attributes(
+        "-fullscreen",
+        not root.attributes("-fullscreen")
+    )
 
 
-root.mainloop() #create Loop
+def toggle_debug_menu(event=None):
+    global debug_visible, debug_text_id
 
+    if debug_visible:
+        canvas.delete("DebugMenu")
+        debug_visible = False
+        debug_text_id = None
+    else:
+        canvas.create_rectangle(
+            10, 10, 320, 420,
+            outline="black",
+            fill="grey",
+            width=4,
+            tags="DebugMenu"
+        )
+
+        debug_text_id = canvas.create_text(
+            165, 40,
+            anchor="n",
+            font=("Helvetica", 12),
+            fill="black",
+            tags="DebugMenu"
+        )
+
+        debug_visible = True
+        update_debug_text()
+
+
+def update_debug_text():
+    if not debug_text_id:
+        return
+
+    canvas.itemconfig(
+        debug_text_id,
+        text=(
+            f"PanelX: {PanelX}\n"
+            f"PanelY: {PanelY}\n"
+            f"PanelZ: {PanelZ}\n\n"
+            f"Image Path:\n"
+            f"{BG.get_image_path(PanelX, PanelY, PanelZ)}\n\n"
+            f"Window Size:\n"
+            f"{root.winfo_width()} x {root.winfo_height()}\n\n"
+            f"pause visible: {pause_visible}\n"
+        )
+    )
+
+
+def toggle_pause_menu(event=None):
+    global pause_visible
+
+    if pause_visible:
+        canvas.delete("PauseMenu")
+        pause_visible = False
+        update_debug_text()
+    else:
+        canvas.create_rectangle(
+            0, 0, 340, 768,
+            outline="black",
+            fill="darkgrey",
+            width=4,
+            tags="PauseMenu"
+        )
+
+        pause_visible = True
+        update_debug_text()
+
+# -------------------------------------------------
+# Bindings
+# -------------------------------------------------
+root.bind("<Configure>", on_window_resize)
+root.bind("<Escape>", toggle_fullscreen)
+root.bind("c", toggle_debug_menu)
+root.bind("p", toggle_pause_menu)
+
+# -------------------------------------------------
+# Main Loop
+# -------------------------------------------------
+root.mainloop()
