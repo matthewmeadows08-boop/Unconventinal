@@ -1,6 +1,9 @@
-####import modules###
+#-------------------------------------------------
+# Imports
+#-------------------------------------------------
 import tkinter as TK
 from PIL import ImageTk, Image
+import time as TIME
 import background as BG
 
 # -------------------------------------------------
@@ -93,21 +96,40 @@ def toggle_debug_menu(event=None):
         debug_visible = False
         debug_text_id = None
     else:
-        canvas.create_rectangle(
-            10, 10, 320, 420,
-            outline="black",
-            fill="grey",
-            width=4,
-            tags="DebugMenu"
-        )
+        if pause_visible == True:
+            canvas.create_rectangle(
+                350, 0, 680, 420,
+                outline="black",
+                fill="grey",
+                width=4,
+                tags="DebugMenu"
+            )
 
-        debug_text_id = canvas.create_text(
-            165, 40,
-            anchor="n",
-            font=("Helvetica", 12),
-            fill="black",
-            tags="DebugMenu"
-        )
+            debug_text_id = canvas.create_text(
+                495, 30,
+                anchor="n",
+                font=("Helvetica", 12),
+                fill="black",
+                tags="DebugMenu"
+            )
+
+        else:
+            canvas.create_rectangle(
+                10, 10, 320, 420,
+                outline="black",
+                fill="grey",
+                width=4,
+                tags="DebugMenu"
+            )
+
+            debug_text_id = canvas.create_text(
+                165, 40,
+                anchor="n",
+                font=("Helvetica", 12),
+                fill="black",
+                tags="DebugMenu"
+            )
+            
 
         debug_visible = True
         update_debug_text()
@@ -120,6 +142,7 @@ def update_debug_text():
     canvas.itemconfig(
         debug_text_id,
         text=(
+            f"**********DEBUG CONSOLE**********\n\n"
             f"PanelX: {PanelX}\n"
             f"PanelY: {PanelY}\n"
             f"PanelZ: {PanelZ}\n\n"
