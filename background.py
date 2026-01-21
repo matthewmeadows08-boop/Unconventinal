@@ -13,6 +13,7 @@ panelZ = 1
 # -------------------------------------------------
 background_map = {
     (0, 0, 0): "Images/Backgrounds/bg_000.png",
+    (1, 1, 1): "Images/Backgrounds/MainMenuBG.png",
     (1, 0, 0): "Images/Backgrounds/bg_100.png",
     (2, 0, 0): "Images/Backgrounds/bg_010.png",
     (3, 0, 0): "Images/Backgrounds/bg_110.png",

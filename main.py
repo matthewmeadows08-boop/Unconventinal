@@ -18,6 +18,7 @@ left_arrow_visible = False
 right_arrow_visible = False
 up_arrow_visible = False
 down_arrow_visible = False
+game_started = False
 last_size = None
 
 # -------------------------------------------------
@@ -28,7 +29,7 @@ root.title("Brilliantly Unconventional")
 root.iconbitmap("Images/appIcon/favicon.ico")
 root.attributes("-fullscreen", True)
 root.minsize(600, 400)
-root.version = "v0.5.2"
+root.version = "vDev.0.3"
 root.update()  # force real dimensions
 
 # -------------------------------------------------
@@ -170,25 +171,28 @@ def update_debug_text():
 def toggle_pause_menu(event=None):
     global Game_Paused
 
-    if Game_Paused:
-        canvas.delete("PauseMenu")
-        Game_Paused = False
-        update_debug_text()
-        toggle_debug_menu(event=None) ###move the debug menu
-        toggle_debug_menu(event=None)
+    if not game_started:
+        return
     else:
-        canvas.create_rectangle(
-            0, 0, 340, 768,
-            outline="black",
-            fill="darkgrey",
-            width=4,
-            tags="PauseMenu"
-        )
+        if Game_Paused:
+            canvas.delete("PauseMenu")
+            Game_Paused = False
+            update_debug_text()
+            toggle_debug_menu(event=None) ###move the debug menu
+            toggle_debug_menu(event=None)
+        else:
+            canvas.create_rectangle(
+                0, 0, 340, 768,
+                outline="black",
+                fill="darkgrey",
+                width=4,
+                tags="PauseMenu"
+            )
 
-        Game_Paused = True
-        update_debug_text()
-        toggle_debug_menu(event=None) ###move the debug menu
-        toggle_debug_menu(event=None) 
+            Game_Paused = True
+            update_debug_text()
+            toggle_debug_menu(event=None) ###move the debug menu
+            toggle_debug_menu(event=None) 
 
 
 def draw_right_arrow(event=None):
