@@ -13,16 +13,22 @@ PanelX, PanelY, PanelZ = BG.panelX, BG.panelY, BG.panelZ
 
 debug_visible = False
 debug_text_id = None
-pause_visible = False
+Game_Paused = False
+left_arrow_visible = False
+right_arrow_visible = False
+up_arrow_visible = False
+down_arrow_visible = False
 last_size = None
 
 # -------------------------------------------------
 # Root Window
 # -------------------------------------------------
 root = TK.Tk()
-root.title("GameEngine")
+root.title("Brilliantly Unconventional")
+root.iconbitmap("Images/appIcon/favicon.ico")
 root.attributes("-fullscreen", True)
 root.minsize(600, 400)
+root.version = "v0.5.2"
 root.update()  # force real dimensions
 
 # -------------------------------------------------
@@ -40,7 +46,7 @@ canvas = TK.Canvas(
 canvas.pack(fill=TK.BOTH, expand=True)
 
 # -------------------------------------------------
-# Background Image
+# Background
 # -------------------------------------------------
 bg_image_raw = Image.open(BG.image_path)
 bg_resized = bg_image_raw.resize(
@@ -55,6 +61,7 @@ bg_canvas_obj = canvas.create_image(
 )
 
 last_size = (screen_w, screen_h)
+
 
 # -------------------------------------------------
 # Functions
@@ -96,9 +103,9 @@ def toggle_debug_menu(event=None):
         debug_visible = False
         debug_text_id = None
     else:
-        if pause_visible == True:
+        if Game_Paused == True:
             canvas.create_rectangle(
-                350, 0, 680, 420,
+                350, 10, 680, 460,
                 outline="black",
                 fill="grey",
                 width=4,
@@ -115,7 +122,7 @@ def toggle_debug_menu(event=None):
 
         else:
             canvas.create_rectangle(
-                10, 10, 320, 420,
+                10, 10, 320, 460,
                 outline="black",
                 fill="grey",
                 width=4,
@@ -123,7 +130,7 @@ def toggle_debug_menu(event=None):
             )
 
             debug_text_id = canvas.create_text(
-                165, 40,
+                165, 30,
                 anchor="n",
                 font=("Helvetica", 12),
                 fill="black",
@@ -142,26 +149,33 @@ def update_debug_text():
     canvas.itemconfig(
         debug_text_id,
         text=(
-            f"**********DEBUG CONSOLE**********\n\n"
+            f"**********DEBUG CONSOLE**********\n"
+            f"Version: {root.version}\n\n"
             f"PanelX: {PanelX}\n"
             f"PanelY: {PanelY}\n"
             f"PanelZ: {PanelZ}\n\n"
             f"Image Path:\n"
             f"{BG.get_image_path(PanelX, PanelY, PanelZ)}\n\n"
-            f"Window Size:\n"
-            f"{root.winfo_width()} x {root.winfo_height()}\n\n"
-            f"pause visible: {pause_visible}\n"
+            f"Window Size: {root.winfo_width()} x {root.winfo_height()}\n\n"
+            f"Game Paused: {Game_Paused}\n\n"
+            f"(L)eft arrow visible: {left_arrow_visible}\n"
+            f"(R)ight arrow visible: {right_arrow_visible}\n"
+            f"(U)p arrow visible: {up_arrow_visible}\n"
+            f"(D)own arrow visible: {down_arrow_visible}\n"
+            f"\n\n**********DEBUG CONSOLE**********"
         )
     )
 
 
 def toggle_pause_menu(event=None):
-    global pause_visible
+    global Game_Paused
 
-    if pause_visible:
+    if Game_Paused:
         canvas.delete("PauseMenu")
-        pause_visible = False
+        Game_Paused = False
         update_debug_text()
+        toggle_debug_menu(event=None) ###move the debug menu
+        toggle_debug_menu(event=None)
     else:
         canvas.create_rectangle(
             0, 0, 340, 768,
@@ -171,15 +185,29 @@ def toggle_pause_menu(event=None):
             tags="PauseMenu"
         )
 
-        pause_visible = True
+        Game_Paused = True
         update_debug_text()
+        toggle_debug_menu(event=None) ###move the debug menu
+        toggle_debug_menu(event=None) 
 
+
+def draw_right_arrow(event=None):
+    global right_arrow_visible
+
+def draw_left_arrow(event=None):
+    global left_arrow_visible
+
+def draw_up_arrow(event=None):
+    global up_arrow_visible
+
+def draw_down_arrow(event=None):
+    global down_arrow_visible
 # -------------------------------------------------
 # Bindings
 # -------------------------------------------------
 root.bind("<Configure>", on_window_resize)
 root.bind("<Escape>", toggle_fullscreen)
-root.bind("c", toggle_debug_menu)
+root.bind("d", toggle_debug_menu)
 root.bind("p", toggle_pause_menu)
 
 # -------------------------------------------------
