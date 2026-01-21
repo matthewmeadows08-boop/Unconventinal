@@ -42,3 +42,25 @@ root.overrideredirect(True) // Removes all window decorations (title bar, border
 
 root.winfo_screenwidth() 
 root.winfo_screenheight() // Fetches the resolution of your monitor in pixels.
+
+
+SPRITE LOGIC
+
+def loadsprites(x, y, z):
+    # Load sprites based on current panel coordinates
+    global PanelX, PanelY, PanelZ
+    PanelX, PanelY, PanelZ = x, y, z
+    if PanelX == 1 and PanelY == 1 and PanelZ == 1:
+        print("Load sprites for panel (1, 1, 1)")
+    elif PanelX == 2 and PanelY == 2 and PanelZ == 2:
+        print("Load sprites for panel (2, 2, 2)")
+    elif PanelX == 3 and PanelY == 3 and PanelZ == 3:
+        print("Load sprites for panel (3, 3, 3)")
+    else:
+        print("No sprites to load for panel (", PanelX, ",", PanelY, ",", PanelZ, ")")
+    pass
+
+def clear_sprites():
+    # Clear all currently loaded sprites
+    print("Clearing all sprites from the screen.")
+    pass
